@@ -17,6 +17,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // AngularFireBase
 import { environment } from '../environments/environment';
 import { AngularFireModule } from '@angular/fire';
+import { AngularFireStorageModule } from '@angular/fire/storage';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { AngularFireModule } from '@angular/fire';
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
-    AngularFireModule.initializeApp(environment.firebase)
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFireStorageModule
   ],
   providers: [],
   bootstrap: [AppComponent]
