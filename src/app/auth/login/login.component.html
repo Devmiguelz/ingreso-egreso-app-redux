@@ -28,7 +28,13 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <button (click)="ValidarLogin()" [disabled]="formLogin.invalid" class="btn btn-primary submit-btn btn-block">Login</button>
+                            <button *ngIf="!cargando" (click)="ValidarLogin()" [disabled]="formLogin.invalid" class="btn btn-primary submit-btn btn-block">
+                                Login
+                            </button>
+                            <button *ngIf="cargando" [disabled]="true" class="btn btn-primary submit-btn btn-block">
+                                <i class="fa fa-spin fa-sync"></i>
+                                 Espere...
+                            </button>
                         </div>
 
 

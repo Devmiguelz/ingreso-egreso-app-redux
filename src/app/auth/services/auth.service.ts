@@ -4,27 +4,47 @@ import { UsuarioRegister, UsuarioLogin } from '../../model/models';
 import Swal from 'sweetalert2'
 import { User } from '../../model/user.model';
 import { map } from "rxjs/operators";
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 // AngularFire
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { Store } from '@ngrx/store';
+import { AppState } from 'src/app/redux/app.reducers';
+import { DeactivarLoadingAction, ActivarLoadingAction } from '../../redux/actions/ui.action';
+import { SetUserAction } from 'src/app/redux/actions/auth.action';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  constructor(private afAuth: AngularFireAuth, 
-              private afStore: AngularFirestore,
-              private router: Router) { }
+  private userSubcripcion: Subscription = new Subscription();
 
-  InitAuthListener(){
+  constructor(private afAuth: AngularFireAuth,
+    private afStore: AngularFirestore,
+    private router: Router,
+    private store: Store<AppState>) { }
+
+  InitAuthListener(): void {
     this.afAuth.authState.subscribe(dataUser => {
-      console.log(dataUser);      
+      if (dataUser) {
+        this.userSubcripcion = this.afStore.doc(`${dataUser.uid}/usuario/`)
+          .valueChanges().subscribe((usuarioStore: User) => {
+            const accion = new SetUserAction(usuarioStore);
+            this.store.dispatch(accion);
+          });
+      }else {
+        this.userSubcripcion.unsubscribe();
+      }
     });
   }
 
   CrearUsuario(usuario: UsuarioRegister): void {
+
+    // Activar el loading a través del dispatch
+    const accion = new ActivarLoadingAction();
+    this.store.dispatch(accion);
+
     this.afAuth
       .createUserWithEmailAndPassword(usuario.email, usuario.password)
       .then(result => {
@@ -36,10 +56,14 @@ export class AuthService {
         }
 
         this.afStore.doc(`${usuarioFire.uid}/usuario`)
-        .set(usuarioFire)
-        .then(() => { 
-          this.router.navigate(['/']);          
-        });
+          .set(usuarioFire)
+          .then(() => {
+            // Desactivar el loading a través del dispatch
+            const accion = new DeactivarLoadingAction();
+            this.store.dispatch(accion);
+
+            this.router.navigate(['/']);
+          });
       })
       .catch(error => {
         Swal.fire({
@@ -52,8 +76,18 @@ export class AuthService {
   }
 
   LoginUsuario(usuario: UsuarioLogin) {
+
+    // Activar el loading a través del dispatch
+    const accion = new ActivarLoadingAction();
+    this.store.dispatch(accion);
+
     this.afAuth.signInWithEmailAndPassword(usuario.email, usuario.password)
       .then(result => {
+
+        // Desactivar el loading a través del dispatch
+        const accion = new DeactivarLoadingAction();
+        this.store.dispatch(accion);
+        
         this.router.navigate(['/']);
       })
       .catch(error => {
@@ -75,9 +109,9 @@ export class AuthService {
     return this.afAuth.authState.pipe(
       map(fbUser => {
 
-        if(fbUser == null){
+        if (fbUser == null) {
           this.router.navigate(['/login']);
-        } 
+        }
 
         return fbUser != null
       })

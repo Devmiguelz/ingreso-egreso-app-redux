@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { ExpRegularEmail } from '../../model/models';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../redux/app.reducers';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -9,15 +12,23 @@ import { ExpRegularEmail } from '../../model/models';
   styles: [
   ]
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, OnDestroy {
 
-  public formRegister: FormGroup;
+  formRegister: FormGroup;
+  cargando: boolean = false;
+  subcripcion: Subscription;
 
   constructor(private formBuilder: FormBuilder,
+    private store: Store<AppState>,
     public _authService: AuthService) { }
 
   ngOnInit(): void {
     this.FormRegister();
+    this.subcripcion = this.store.select('iu').subscribe(ui => this.cargando = ui.isLoading);
+  }
+
+  ngOnDestroy() : void{
+    this.subcripcion.unsubscribe();
   }
 
   FormRegister(): void {

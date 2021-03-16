@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { ExpRegularEmail } from '../../model/models';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../redux/app.reducers';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -9,15 +12,23 @@ import { ExpRegularEmail } from '../../model/models';
   styles: [
   ]
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
 
-  public formLogin: FormGroup;
+  formLogin: FormGroup;
+  cargando: boolean = false;
+  subcripcion: Subscription;
 
   constructor(private formBuilder: FormBuilder,
+    private store: Store<AppState>,
     public _authService: AuthService) { }
 
   ngOnInit(): void {
     this.FormLogin();
+    this.subcripcion = this.store.select('iu').subscribe(ui => this.cargando = ui.isLoading);
+  }
+
+  ngOnDestroy() : void{
+    this.subcripcion.unsubscribe();
   }
 
   FormLogin(): void {
