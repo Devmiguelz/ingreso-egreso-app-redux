@@ -1,8 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from 'src/app/redux/app.reducers';
 import { Subscription } from 'rxjs';
-import { IngresoEgresoState } from '../../redux/state/ingreso-egreso.state';
+import { IngresoEgresoState, IngresoEgresoAppState } from '../../redux/state/ingreso-egreso.state';
 import { IngresoEgreso } from '../../model/ingreso-egreso.model';
 
 @Component({
@@ -25,7 +24,7 @@ export class EstadisticaComponent implements OnInit, OnDestroy {
   public doughnutChartLabels: string[] = ['INGRESOS', 'EGRESOS'];
   public doughnutChartData: number[];
   
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<IngresoEgresoAppState>) { }
 
   ngOnInit(): void {
     this.estadisticaSub = this.store.select('ingresoEgreso')

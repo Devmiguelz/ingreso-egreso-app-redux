@@ -9,11 +9,12 @@ import { dashboardRoutes } from './dashboard/dashboard.routes';
 const routes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
-    { 
-        path: '', 
-        component: DashboardComponent ,
-        children: dashboardRoutes,
-        canActivate: [AuthGuardGuard]
+    {
+        path: '',
+        loadChildren: () => import(`./ingreso-egreso/ingreso-egreso.module`).then(
+            module => module.IngresoEgresoModule
+        ),
+        canLoad: [AuthGuardGuard]
     },
     { path: '**', redirectTo: '' }
 ];
