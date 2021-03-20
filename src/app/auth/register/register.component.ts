@@ -16,7 +16,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   formRegister: FormGroup;
   cargando: boolean = false;
-  subcripcion: Subscription;
+  subcripcion: Subscription = new Subscription();
 
   constructor(private formBuilder: FormBuilder,
     private store: Store<AppState>,

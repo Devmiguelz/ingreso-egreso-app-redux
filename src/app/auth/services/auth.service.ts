@@ -11,7 +11,8 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { Store } from '@ngrx/store';
 import { AppState } from 'src/app/redux/app.reducers';
 import { DeactivarLoadingAction, ActivarLoadingAction } from '../../redux/actions/ui.action';
-import { SetUserAction } from 'src/app/redux/actions/auth.action';
+import { SetUserAction, UnSetUserAction } from 'src/app/redux/actions/auth.action';
+import { IngresoEgresoService } from '../../ingreso-egreso/services/ingreso-egreso.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +20,7 @@ import { SetUserAction } from 'src/app/redux/actions/auth.action';
 export class AuthService {
 
   private userSubcripcion: Subscription = new Subscription();
+  private userAuth: User;
 
   constructor(private afAuth: AngularFireAuth,
     private afStore: AngularFirestore,
@@ -30,6 +32,7 @@ export class AuthService {
       if (dataUser) {
         this.userSubcripcion = this.afStore.doc(`${dataUser.uid}/usuario/`)
           .valueChanges().subscribe((usuarioStore: User) => {
+            this.userAuth = usuarioStore;
             const accion = new SetUserAction(usuarioStore);
             this.store.dispatch(accion);
           });
@@ -103,6 +106,7 @@ export class AuthService {
   LogOut() {
     this.router.navigate(['/login']);
     this.afAuth.signOut();
+    this.store.dispatch(new UnSetUserAction());
   }
 
   isAuth(): Observable<boolean> {
@@ -118,4 +122,7 @@ export class AuthService {
     );
   }
 
+  getUsuarioAuth(): User{
+    return {... this.userAuth};
+  }
 }
